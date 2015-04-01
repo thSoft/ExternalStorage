@@ -29,8 +29,8 @@ type alias Reference a = {
 {-| Creates a reference to the object at the given URL.
 The object will be looked up from an arbitrary cache and decoded with the given decoder.
 
-  book : Reference Book
-  book = "http://example.com/book" |> create bookDecoder
+    book : Reference Book
+    book = "http://example.com/book" |> create bookDecoder
 -}
 create : Decoder a -> String -> Reference a
 create decoder url =
