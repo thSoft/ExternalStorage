@@ -1,0 +1,16 @@
+{
+    "version": "1.0.0",
+    "summary": "Integrating external storages with Elm",
+    "repository": "https://github.com/thSoft/ExternalStorage.git",
+    "license": "BSD3",
+    "source-directories": [
+        "src"
+    ],
+    "exposed-modules": [
+        "ExternalStorage.Cache",
+        "ExternalStorage.Reference"
+    ],
+    "dependencies": {
+        "elm-lang/core": "1.1.0 <= v < 2.0.0"
+    }
+}
