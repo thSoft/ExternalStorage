@@ -12,7 +12,7 @@ import Dict (..)
 import Signal (..)
 import Json.Decode (..)
 
-{-| Caches JSON values coming from an external storage by their URL.
+{-| Stores JSON values (potentially coming from an external storage) associated with their URLs.
 
     cache : Signal Cache
 -}
