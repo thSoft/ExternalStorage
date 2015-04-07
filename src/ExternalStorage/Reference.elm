@@ -1,6 +1,6 @@
 module ExternalStorage.Reference (
   Reference,
-  Error,
+  Error(NotFound, DecodingFailed),
   create,
   decoder) where
 
