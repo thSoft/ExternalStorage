@@ -8,9 +8,9 @@ module ExternalStorage.Cache (
 @docs Cache, create, Update
 -}
 
-import Dict (..)
-import Signal (..)
-import Json.Decode (..)
+import Dict exposing (..)
+import Signal exposing (..)
+import Json.Decode exposing (..)
 
 {-| Stores JSON values (potentially coming from an external storage) associated with their URLs.
 

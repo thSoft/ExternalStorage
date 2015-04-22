@@ -10,11 +10,11 @@ module ExternalStorage.Reference (
 -}
 
 import Dict
-import Result (..)
+import Result exposing (..)
 import Result
-import Json.Decode (..)
+import Json.Decode exposing (..)
 import Json.Decode as Decode
-import ExternalStorage.Cache (..)
+import ExternalStorage.Cache exposing (..)
 
 {-| A type-safe remote reference which can be resolved lazily with its `get` function.
 
