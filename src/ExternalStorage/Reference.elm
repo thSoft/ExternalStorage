@@ -25,7 +25,7 @@ import ExternalStorage.Cache exposing (..)
 -}
 type alias Reference a = {
   url: String,
-  get: Cache -> Result Error a
+  get: Result Error a
 }
 
 {-| The various error cases that might happen when dereferencing an object.
@@ -40,27 +40,28 @@ type Error =
   DecodingFailed String
 
 {-| Creates a reference to the object at the given URL.
-The object will be looked up from an arbitrary cache and decoded with the given decoder.
+The object is looked up from the given cache and decoded with the given decoder.
 
-    book : Reference Book
-    book = "http://example.com/book" |> create bookDecoder
+    book : Signal (Reference Book)
+    book = cache |> Signal.map create bookDecoder "http://example.com/book"
 -}
-create : Decoder a -> String -> Reference a
-create decoder url =
+create : Decoder a -> String -> Cache -> Reference a
+create decoder url cache =
   {
     url = url,
-    get = \cache ->
+    get =
       case cache |> Dict.get url of
         Just value -> value |> decodeValue decoder |> formatError DecodingFailed
         Nothing -> Result.Err NotFound
   }
 
-{-| Decodes a JavaScript string to a remote reference.
+{-| Decodes a JavaScript string to a remote reference with the string as URL.
 
-    bookDecoder =
+    bookDecoder : Cache -> Decoder Book
+    bookDecoder cache =
       object2 Book
         ("title" := string)
-        ("authors" := list (decoder writerDecoder))
+        ("authors" := list (decoder writerDecoder cache))
 -}
-decoder : Decoder a -> Decoder (Reference a)
-decoder decoder = string |> Decode.map (create decoder)
+decoder : Decoder a -> Cache -> Decoder (Reference a)
+decoder decoder cache = string |> Decode.map (\url -> create decoder url cache)
