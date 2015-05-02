@@ -43,7 +43,9 @@ type Error =
 The object is looked up from the given cache and decoded with the given decoder.
 
     book : Signal (Reference Book)
-    book = cache |> Signal.map create bookDecoder "http://example.com/book"
+    book =
+      let load cache = Reference.create (bookDecoder cache) bookUrl cache
+      in Signal.map load cache
 -}
 create : Decoder a -> String -> Cache -> Reference a
 create decoder url cache =
