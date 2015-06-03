@@ -2,11 +2,12 @@ module ExternalStorage.Loader (
   Remote,
   Error(..),
   load,
-  loadRaw) where
+  loadRaw,
+  loadList) where
 
 {-|
 # Building your model from a cache
-@docs Remote, Error, load, loadRaw
+@docs Remote, Error, load, loadRaw, loadList
 -}
 
 import Dict
@@ -109,3 +110,30 @@ loadRaw : Cache -> Decoder object -> String -> Result Error (Remote object)
 loadRaw cache objectDecoder url =
   let parseObject _ rawObject = Result.Ok rawObject
   in load cache objectDecoder parseObject url
+
+{-| Loads a list of model objects given their URLs from the given cache using an existing loader function.
+
+    parseLibrary : Cache -> RawLibrary -> Result Error Library
+    parseLibrary cache rawLibrary =
+      let booksResult = rawLibrary.books |> loadList cache loadBook
+      in
+        booksResult |> Result.map (\books ->
+          {
+            books = books
+          }
+        )
+
+    type alias RawLibrary = {
+      books: List String
+    }
+
+    type alias Library = {
+      books: List (Remote Book)
+    }
+-}
+loadList : Cache -> (Cache -> String -> Result Error (Remote a)) -> List String -> Result Error (List (Remote a))
+loadList cache loadObject urls =
+  let augment url objectsResult =
+        let objectResult = url |> loadObject cache
+        in Result.map2 (::) objectResult objectsResult
+  in urls |> List.foldr augment (Ok [])
