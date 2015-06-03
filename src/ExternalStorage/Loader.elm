@@ -52,13 +52,13 @@ makeDecodingFailed url message =
 {-| Loads a subtree of your model starting from an object.
 Finds the JSON value belonging to the given URL in the given cache,
 then decodes it to a raw object using the given decoder,
-then parses the raw object to the real object using the given parser function.
+then resolves the raw object to the real object using the given resolver function.
 The raw object is like the real one regarding attributes,
 but contains URLs instead of object references.
-The parser should resolve the URLs in the raw objects to real objects from the cache using their loader functions.
+The resolver should resolve the URLs in the raw objects to real objects from the cache using their loader functions.
 
     loadBook : Cache -> String -> Result Error (Remote Book)
-    loadBook cache url = load cache rawBookDecoder parseBook url
+    loadBook cache url = load cache rawBookDecoder resolveBook url
 
     rawBookDecoder : Decoder RawBook
     rawBookDecoder =
@@ -66,8 +66,8 @@ The parser should resolve the URLs in the raw objects to real objects from the c
         ("title" := string)
         ("author" := string)
 
-    parseBook : Cache -> RawBook -> Result Error Book
-    parseBook cache rawBook =
+    resolveBook : Cache -> RawBook -> Result Error Book
+    resolveBook cache rawBook =
       let authorResult = rawBook.author |> loadWriter cache
       in
         authorResult |> Result.map (\author ->
@@ -83,11 +83,11 @@ The parser should resolve the URLs in the raw objects to real objects from the c
     }
 -}
 load : Cache -> Decoder rawObject -> (Cache -> rawObject -> Result Error object) -> String -> Result Error (Remote object)
-load cache rawObjectDecoder parseObject url =
+load cache rawObjectDecoder resolveObject url =
   let maybeValue = cache |> Dict.get url
       valueResult = maybeValue |> fromMaybe (makeNotFound url)
       rawObjectResult = valueResult `Result.andThen` (\value -> value |> decodeValue rawObjectDecoder |> formatError (makeDecodingFailed url))
-      objectResult = rawObjectResult `Result.andThen` (parseObject cache)
+      objectResult = rawObjectResult `Result.andThen` (resolveObject cache)
   in objectResult |> Result.map (\object -> { object | url = url })
 
 {-| Loads a single model object which contains only attributes but no references to further model objects.
@@ -108,13 +108,13 @@ then decodes it to an object using the given decoder.
 -}
 loadRaw : Cache -> Decoder object -> String -> Result Error (Remote object)
 loadRaw cache objectDecoder url =
-  let parseObject _ rawObject = Result.Ok rawObject
-  in load cache objectDecoder parseObject url
+  let resolveObject _ rawObject = Result.Ok rawObject
+  in load cache objectDecoder resolveObject url
 
 {-| Loads a list of model objects given their URLs from the given cache using an existing loader function.
 
-    parseLibrary : Cache -> RawLibrary -> Result Error Library
-    parseLibrary cache rawLibrary =
+    resolveLibrary : Cache -> RawLibrary -> Result Error Library
+    resolveLibrary cache rawLibrary =
       let booksResult = rawLibrary.books |> loadList cache loadBook
       in
         booksResult |> Result.map (\books ->
