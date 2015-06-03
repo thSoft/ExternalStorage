@@ -1,5 +1,5 @@
 {
-    "version": "4.1.0",
+    "version": "4.1.1",
     "summary": "Integrating external storages with Elm",
     "repository": "https://github.com/thSoft/ExternalStorage.git",
     "license": "BSD3",
