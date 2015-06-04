@@ -17,6 +17,12 @@ import Json.Decode exposing (..)
 import Json.Decode as Decode
 import ExternalStorage.Cache exposing (..)
 
+{-| The result of loading from a cache.
+
+    model : Signal (Loaded Library)
+-}
+type alias Loaded a = Result Error (Remote a)
+
 {-| Associates an URL to an object.
 
     type alias Book = {
@@ -57,7 +63,7 @@ The raw object is like the real one regarding attributes,
 but contains URLs instead of object references.
 The resolver should resolve the URLs in the raw objects to real objects from the cache using their loader functions.
 
-    loadBook : Cache -> String -> Result Error (Remote Book)
+    loadBook : Cache -> String -> Loaded Book
     loadBook cache url = load cache rawBookDecoder resolveBook url
 
     rawBookDecoder : Decoder RawBook
@@ -82,7 +88,7 @@ The resolver should resolve the URLs in the raw objects to real objects from the
       author: String
     }
 -}
-load : Cache -> Decoder rawObject -> (Cache -> rawObject -> Result Error object) -> String -> Result Error (Remote object)
+load : Cache -> Decoder rawObject -> (Cache -> rawObject -> Result Error object) -> String -> Loaded object
 load cache rawObjectDecoder resolveObject url =
   let maybeValue = cache |> Dict.get url
       valueResult = maybeValue |> fromMaybe (makeNotFound url)
@@ -94,7 +100,7 @@ load cache rawObjectDecoder resolveObject url =
 Finds the JSON value belonging to the given URL in the given cache,
 then decodes it to an object using the given decoder.
 
-    loadWriter : Cache -> String -> Result Error (Remote Writer)
+    loadWriter : Cache -> String -> Loaded Writer
     loadWriter cache url = loadRaw cache writerDecoder url
 
     type alias Writer = {
@@ -106,7 +112,7 @@ then decodes it to an object using the given decoder.
       object1 Writer
         ("name" := string)
 -}
-loadRaw : Cache -> Decoder object -> String -> Result Error (Remote object)
+loadRaw : Cache -> Decoder object -> String -> Loaded object
 loadRaw cache objectDecoder url =
   let resolveObject _ rawObject = Result.Ok rawObject
   in load cache objectDecoder resolveObject url
@@ -131,7 +137,7 @@ loadRaw cache objectDecoder url =
       books: List (Remote Book)
     }
 -}
-loadList : Cache -> (Cache -> String -> Result Error (Remote a)) -> List String -> Result Error (List (Remote a))
+loadList : Cache -> (Cache -> String -> Loaded a) -> List String -> Result Error (List (Remote a))
 loadList cache loadObject urls =
   let augment url objectsResult =
         let objectResult = url |> loadObject cache
