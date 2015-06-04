@@ -1,4 +1,5 @@
 module ExternalStorage.Loader (
+  Loaded,
   Remote,
   Error(..),
   load,
@@ -7,7 +8,7 @@ module ExternalStorage.Loader (
 
 {-|
 # Building your model from a cache
-@docs Remote, Error, load, loadRaw, loadList
+@docs Loaded, Remote, Error, load, loadRaw, loadList
 -}
 
 import Dict
